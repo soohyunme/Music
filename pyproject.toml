@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "auto review service"
+version = "0.1.0"
+description = "auto review service"
+authors = ["soohyunme <soohyun.dev@gmail.com>"]
+license = "MIT License"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "3.10.5"
+fastapi = "^0.103.0"
+uvicorn = "^0.23.2"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
