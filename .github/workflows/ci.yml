@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: CI Pipeline
 
 on:
   push:
@@ -32,8 +32,6 @@ jobs:
 
       - name: Run Linting
         run: poetry run flake8
-
-
 
 env:
   PYTHON_VERSION: 3.10.5
