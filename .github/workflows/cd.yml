@@ -2,7 +2,7 @@ name: CD Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "feature/mlflow" ]
 
 jobs:
   publish:
@@ -45,15 +45,14 @@ jobs:
           token: ${{ secrets.CLOUDTYPE_TOKEN }}
           project: toy_lab/review_generator
           stage: main
-          yaml: >
+          yaml: |
             name: ml-pipe-project
             app: dockerfile
             options:
               image: ghcr.io/${{ github.repository }}/api:${{ github.sha }}
               ports: 4000 5000
-              commands: >-
+              commands: |-
                 poetry run python src/app.py &
-
                 poetry run mlflow server --host 0.0.0.0 --backend-store-uri /tmp/mlruns --no-server-artifacts &
             context:
               git:
