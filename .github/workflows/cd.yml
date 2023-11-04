@@ -46,14 +46,15 @@ jobs:
           project: toy_lab/review_generator
           stage: main
           yaml: >
-            name: api
-
-            app: container
-
+            name: ml-pipe-project
+            app: dockerfile
             options:
               image: ghcr.io/${{ github.repository }}/api:${{ github.sha }}
-              ports: 5000
-              shell: /bin/bash
+              ports: 4000 5000
+              commands: >-
+                poetry run python src/app.py &
+
+                poetry run mlflow server --host 0.0.0.0 --backend-store-uri /tmp/mlruns --no-server-artifacts &
             context:
               git:
                 url: git@github.com:${{ github.repository }}.git
