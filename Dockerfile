@@ -18,6 +18,9 @@ RUN python3 -m venv $POETRY_VENV \
 	&& $POETRY_VENV/bin/pip install -U pip setuptools \
 	&& $POETRY_VENV/bin/pip install poetry==${POETRY_VERSION}
 
+# Install MLFlow
+RUN $POETRY_VENV/bin/pip install mlflow
+
 USER python:python
 ENV PATH="/home/${USER}/.local/bin:${PATH}"
 ENV PATH="${PATH}:${POETRY_VENV}/bin"
@@ -35,7 +38,4 @@ RUN poetry env use 3.10.5 && poetry install --no-interaction --no-cache --withou
 
 # Copy Application
 COPY --chown=python:python . /app
-
-# Run Application
-EXPOSE 5000
-CMD [ "poetry", "run", "python", "src/app.py" ]
+CMD ["/bin/sh", "-c", "poetry run python src/app.py & poetry run mlflow server --host 0.0.0.0 --backend-store-uri /tmp/mlruns --no-serve-artifacts"]
