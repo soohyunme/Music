@@ -5,56 +5,35 @@ on:
     branches: [ "main" ]
 
 jobs:
-  publish:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@main
-
-      - name: Login to GitHub Packages
-        uses: docker/login-action@v1
-        with:
-          registry: docker.pkg.github.com
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and Push Docker Image
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: docker.pkg.github.com/${{ github.repository }}/api:${{ github.sha }}
-
   deploy:
-    needs: publish
-    runs-on: ubuntu-latest
+    runs-on: oracle
+    env:
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
-
-      - name: Connect Deploy Key
-        uses: cloudtype-github-actions/connect@v1
         with:
-          token: ${{ secrets.CLOUDTYPE_TOKEN }}
-          ghtoken: ${{ secrets.GHP_TOKEN }}
+          clean: true
 
-      - name: Deploy to Cloudtype
-        uses: cloudtype-github-actions/deploy@v1
-        with:
-          token: ${{ secrets.CLOUDTYPE_TOKEN }}
-          project: toy_lab/review_generator
-          stage: main
-          yaml: >
-            name: api
+      - name: set up docker compose
+        run: |
+          docker compose up --build -d --remove-orphans
+        env:
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      - name: API server health check
+        run: |
+          sleep 5
+          response_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/health)
+          
+          if [ $response_code -eq 200 ]; then
+            echo "API server is healthy (HTTP $response_code)"
+          else
+            echo "API server is not healthy (HTTP $response_code)"
+            exit 1
+          fi
 
-            app: container
-
-            options:
-              image: ghcr.io/${{ github.repository }}/api:${{ github.sha }}
-              ports: 5000
-              shell: /bin/bash
-            context:
-              git:
-                url: git@github.com:${{ github.repository }}.git
-                ref: ${{ github.ref }}
+secrets:
+  DB_PASSWORD: 
+    description: 'Database password'
+    required: true
