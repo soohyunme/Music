@@ -33,7 +33,3 @@ jobs:
             exit 1
           fi
 
-secrets:
-  DB_PASSWORD: 
-    description: 'Database password'
-    required: true
