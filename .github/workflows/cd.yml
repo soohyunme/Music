@@ -7,8 +7,6 @@ on:
 jobs:
   deploy:
     runs-on: oracle
-    env:
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
     steps:
       - name: Checkout Code
